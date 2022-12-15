@@ -1,0 +1,180 @@
+#!/bin/bash
+#shellcheck disable=SC2139,SC2064
+
+alias g='git'
+alias gs='git status'
+alias gc='git checkout'
+alias grim='git rebase master -i'
+alias stash='git stash'
+alias pop='git stash pop'
+alias sps='git stash && git pull && git stash pop'
+alias clean='git clean -fdx -e ".vscode/" -e ".idea"'
+alias k='gitk -n100'
+alias root='cd $(git rev-parse --show-toplevel)'
+
+alias gitRoot='git rev-parse --show-toplevel'
+
+function gl {
+  local s="▕"
+  git log --color=always --date=relative -n 100 \
+    --pretty=format:"%D$s%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%Creset%s$s%C(cyan)%cN$s%(trailers:separator=; )" "$@" | \
+    column --table --separator "$s" --output-separator "$s" | \
+    awk -F $s '
+      { aN = 4; last = 5; cN = 6; trailers = 7 }
+      { endTrailerPrefix = "└─ "; trailerPrefix = endTrailerPrefix }
+      { if ($1 ~ /[^ ]/) printf "  \033[1;32m┌─ %s\n", $1 }
+      { for (i=2; i<=last; i++) printf "%s ", $i }
+      {
+        gsub(/^ *| *$/, "", $aN)
+        gsub(/^ *| *$/, "", $cN)
+        differentCommitter = $cN != $aN
+        if (differentCommitter) { trailerPrefix = "├─ " }
+      }
+      { if ($trailers ~ /[^ ]/) printf "\n  \033[0;35m%s%s", trailerPrefix, $trailers }
+      {
+        if (differentCommitter) printf "\n  \033[1;35m%scommitted by %s", endTrailerPrefix, $cN
+        print ""
+      }
+      ' | \
+    less -R -S -# 5
+}
+export -f gl
+
+function gg {
+  git log --graph --all --date=relative --abbrev-commit --decorate --color=always \
+    --format=format:'%C(yellow)%h %C(red)%cd %C(cyan)%aN %C(reset)%s %C(bold yellow)%d%C(reset)' \
+    "$@" | less -R -S -# 5
+}
+
+function __git_wrap__git_log() {
+  __git_func_wrap _git_log
+}
+complete -F __git_wrap__git_log gl
+
+function diffall {
+  local counter=0 total
+  total=$(git diff --name-only "$@" | wc -l)
+  git diff --name-only "$@" | while read -r filename; do
+      (( counter=counter+1 ))
+      echo "$filename"
+
+      mod=$((counter % 50))
+      if [ "$mod" -eq "0" ]
+      then
+        echo "Diffing $counter out of $total files"
+        git difftool --no-prompt -- "$filename" || break
+        continue
+      fi
+      git difftool --no-prompt -- "$filename" &
+  done
+}
+
+function __git_wrap__git_diff() {
+  __git_func_wrap _git_diff
+}
+complete -F __git_wrap__git_diff diffall
+
+function tempDisableHooks() (
+  local hookDir
+  hookDir="$(git rev-parse --git-path hooks)"
+  local tempName="${hookDir}_"
+  mv "$hookDir" "$tempName"
+  trap "mv '$tempName' '$hookDir'" RETURN EXIT
+  "$@"
+)
+complete -F _command tempDisableHooks
+
+alias commit='tempDisableHooks git commit -v'
+alias fixup='tempDisableHooks git commit -v --fixup'
+alias amend='tempDisableHooks git commit --amend -v'
+alias noedit='tempDisableHooks git commit --amend --no-edit'
+alias rebase='tempDisableHooks git rebase'
+alias revert='tempDisableHooks git revert'
+alias gcp='tempDisableHooks git cherry-pick'
+alias cont='tempDisableHooks git rebase --continue'
+
+mergeToMaster() (
+  set -x
+  git checkout master && \
+  git pull && \
+  git checkout - && \
+  rebase master -i && \
+  git checkout - && \
+  git merge - && \
+  git status
+)
+
+function ls-files {
+  git ls-files -- ":(icase)$*"
+}
+
+function fzfSelectFilesWithPreview {
+  fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview \
+    --multi --select-1 --exit-0 \
+    --preview-window 30% \
+    --preview 'bat --style=numbers --color=always --line-range :300 {}' \
+    "$@"
+}
+
+function mySelect {
+  readarray -t opts
+
+  if [[ "${#opts[@]}" -eq 1 ]]; then
+    echo "${opts[0]}"
+    return 0
+  fi
+
+  select opt in "${opts[@]}"
+  do
+    #shellcheck disable=SC2076
+    if [[ ! "${opts[*]}" =~ "$opt" ]]; then
+      >&2 echo "$opt was not an option"
+      return 1
+    fi
+    echo "$opt"
+    break
+  done < /dev/tty
+}
+
+function open {
+  git ls-files |
+    { fzfSelectFilesWithPreview -q "${1//\*/}" || >&2 echo 'no matches' && return 1; } |
+    while read -r file; do
+      [ -n "$file" ] && echo "$file" && start "$file" && sleep 0.1s
+    done
+}
+
+function modifyCommitMessages {
+  local messageCallback revrange
+  revrange="$1"
+  messageCallback="$2"
+
+  git filter-repo --message-callback "$messageCallback" --refs "$revrange" --force
+}
+
+function appendIfNotPresent {
+  message="$2"
+  local messageCallback="
+  if b'$message' not in message:
+    message += b'$message'
+  return message
+  "
+
+  modifyCommitMessages "$1" "$messageCallback"
+}
+
+appendReviewer() (
+  set -u
+  local reviewer="$1"
+  local revRange="${2-HEAD~..}"
+  if [[ ! "$revRange" =~ \.\. ]]; then
+    >&2 echo "rev range should contain '..'"
+    return 1
+  fi
+  appendIfNotPresent "$revRange" "\ncode-reviewed-by: $reviewer"
+)
+
+deleteMergedBranches() {
+  git branch --merged | grep -Ev "(^\*|master|main|dev)" | xargs git branch -d
+}
+

@@ -1,0 +1,94 @@
+#!/bin/bash
+#shellcheck disable=SC2139
+
+TIMEFORMAT='real: %lR | user: %lU | sys: %lS'
+
+set -o vi
+set -o pipefail
+shopt -s globstar
+shopt -u nullglob
+
+export LESS="IRS"
+
+function min {
+  echo "$(($1<$2 ? $1 : $2))"
+}
+
+. ~/dotfiles/fast_git_ps1
+function myPS1 {
+  __fastgit_ps1
+  #PS1="($lastExitCode) $PS1"
+  #if [[ $lastExitCode -eq 0 ]]; then
+  local PAD=$((${LINES:-0}/3))
+  PAD=$(( (PAD / 15) * 15 )) # rounds down to the nearest 15
+  # command substitution removes trailing newlines so we have to hack around it
+  local SPACE
+  SPACE="$(printf %${PAD}s | tr ' ' '\n'; echo x)"
+  #shellcheck disable=SC2025
+  export PS1="${SPACE%x}\033[${PAD}A${PS1}"
+}
+
+export PROMPT_COMMAND='myPS1'
+
+is_windows() {
+  [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "cygwin" ]
+}
+
+if is_windows; then
+  desk="/c/Users/$USERNAME/Desktop"
+  docs="/c/Users/$USERNAME/Documents"
+  downs="/c/Users/$USERNAME/Downloads"
+  notes="$docs/Notes"
+
+  alias desk="cd '$desk'"
+  alias docs="cd '$docs'"
+  alias notes="cd '$notes'"
+  alias downs="cd '$downs'"
+  alias todo="vim '$notes/TODO.txt'"
+  alias capsesc="start ~/dotfiles/caps-esc.ahk"
+
+  alias tree='tree.com //f //a'
+fi
+
+function cleanDir() {
+  local dir="$1"
+  find "$dir" -type f -mtime +7 -delete
+  find "$dir" -type d -empty -delete
+}
+
+alias cleantmp='cleanDir "$TMP"'
+
+export PATH="$PATH:/c/Users/zad/.vscode/extensions/timonwong.shellcheck-0.19.5/binaries/win32/x32"
+
+function trim() {
+    local var="$*"
+    # remove leading whitespace characters
+    var="${var#"${var%%[![:space:]]*}"}"
+    # remove trailing whitespace characters
+    var="${var%"${var##*[![:space:]]}"}"
+    printf '%s' "$var"
+}
+
+if is_windows; then
+  function run-in-new-split-tab {
+    local idx=$1 title=$2 cmd=$3
+    shift 3
+
+    local splitDir=(H V H H V V V V H H H H H H H H)
+    local focusCommands=('' 'wt move-focus left' 'wt move-focus right' 'wt move-focus left && wt move-focus up' 'wt move-focus right' 'wt move-focus down && wt move-focus left' 'wt move-focus right && wt move-focus right' '')
+
+    local subcommand
+    if [ "$idx" -eq 0 ]; then
+      subcommand='new-tab'
+    else
+      subcommand='split-pane'
+    fi
+
+
+    wt "$subcommand" --title "$title" "-${splitDir[idx]}" --suppressApplicationTitle "$cmd" "$@"
+    # sometimes the new tab takes a little time to open; the move-focus won't work as expected if it isn't open
+    sleep 0.1s
+    eval "${focusCommands[idx]}"
+    echo "$(( (idx+1) % ${#focusCommands[@]}))"
+  }
+fi

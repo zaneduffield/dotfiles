@@ -1,0 +1,43 @@
+[user]
+	name = Zane Duffield
+
+[alias]
+  b = branch
+  c = checkout
+  cp = cherry-pick
+  s = status
+  dirdiff = difftool --dir-diff
+	dirshow = "!f(){ git dirdiff \"$1~\" \"$1\"; }; f"
+  basediff = "! git difftool \"$(git merge-base \"$(git rev-parse --abbrev-ref origin/HEAD)\" HEAD)\""
+	merge-ours = merge -s recursive -Xours
+	fpwl = push --force-with-lease
+  yolo = "!f(){ git commit -a -m \"$(curl http://whatthecommit.com/index.txt 2>/dev/null)\" }; f"
+
+
+[core]
+  autocrlf = false
+	longpaths = true
+	editor = vim
+  pager = delta
+	fsmonitor = true
+
+[advice]
+	detachedHead = false
+
+[rebase]
+	autosquash = true
+
+[branch]
+  autosetuprebase = always
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true  # use n and N to move between diff sections
+  # side-by-side = true
+[merge]
+  conflictstyle = diff3
+
+[diff]
+  colorMoved = default

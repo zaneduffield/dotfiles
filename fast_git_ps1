@@ -93,6 +93,7 @@ function __git_state() {
 }
 
 function __fastgit_ps1 () {
+    local lastExitCode=$?
     local headfile="" head="" branch="" state=""
     local dir="$PWD"
     local gitdir=""
@@ -129,6 +130,8 @@ function __fastgit_ps1 () {
       state="($(__format "$branch" "" "$state"))"
     fi
 
+    local dollar
+    dollar="\[\e[0;$((lastExitCode == 0 ? 0 : 91))m\]\$\e[0m"
     # Edit to suit your needs
-    export PS1="\[\e]0;\W\a\]\n\[\e[32m\]\u@\H \[\e[33m\]\w\[\e[0m\] \[\033[36m\]$state\[\033[0m\]\n\$ "
+    export PS1="\[\e]0;\W\a\]\n\[\e[32m\]\u@\H \[\e[33m\]\w\[\e[0m\] \[\033[36m\]$state\[\033[0m\]\n$dollar "
 }

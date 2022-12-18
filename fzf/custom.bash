@@ -19,7 +19,9 @@ FZF_GL_PREVIEW_COMMAND="gl"
 
 git-fzf-widget() {
   local selected
-  selected="$(FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $GIT_FZF_DEFAULT_OPTS" __fzf_select__)"
+  selected=$(
+    (FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $GIT_FZF_DEFAULT_OPTS" __fzf_select__)
+  )
   if [ $# -gt 0 ]; then selected=$(echo "$selected" | eval "$@"); fi
   READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
   READLINE_POINT=$(( READLINE_POINT + ${#selected} ))

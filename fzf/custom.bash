@@ -66,7 +66,6 @@ _gt() {
 _gl() {
   is_in_git_repo || return
 
-  local selected
   s='##' \
   FZF_CTRL_T_COMMAND="git log --color=always --date=relative -n 100 \
     --pretty=format:\"%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%Creset%s\" | \

@@ -5,14 +5,19 @@ is_in_git_repo() {
   git rev-parse HEAD &> /dev/null
 }
 
-export FZF_DEFAULT_COMMAND="git ls-files 2> /dev/null || \
+# ripped straight from fzf/key-bindings.bash
+export FZF_CTRL_T_DEFAULT_COMMAND="\
   find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type f -print \
     -o -type d -print \
     -o -type l -print 2> /dev/null | cut -b3-"
 
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND="${FZF_DEFAULT_COMMAND/git ls-files/git ls-files -co --directory | sed -E \'s|[^/]*$||\' | grep . | uniq -u}"
+export FZF_CTRL_T_COMMAND="git ls-files 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND"
+
+# ripped straight from fzf/key-bindings.bash
+FZF_ALT_C_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
+    -o -type d -print 2> /dev/null | cut -b3-"
+export FZF_ALT_C_COMMAND="\\(git ls-files -co --directory | sed -E \'s|[^/]*$||\' | grep . | uniq -u\\) || $FZF_ALT_C_DEFAULT_COMMAND"
 
 export GIT_FZF_DEFAULT_OPTS='--height 50% --min-height 20 --border --bind ctrl-/:toggle-preview'
 FZF_GL_PREVIEW_COMMAND="gl"
@@ -25,6 +30,14 @@ git-fzf-widget() {
   if [ $# -gt 0 ]; then selected=$(echo "$selected" | eval "$@"); fi
   READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
   READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
+}
+
+_gtu() {
+  FZF_CTRL_T_COMMAND="git ls-files -o --exclude-standard 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND" __fzf_select__
+}
+
+_gta() {
+  FZF_CTRL_T_COMMAND="git ls-files -o 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND" __fzf_select__
 }
 
 _gd() {
@@ -87,6 +100,8 @@ _gs() {
 if [[ $- =~ i ]]; then
   bind -x '"\eg": _gcb'
 
+  bind -x '"\C-g\C-u": _gtu'
+  bind -x '"\C-g\C-a": _gta'
   bind -x '"\C-g\C-d": _gd'
   bind -x '"\C-g\C-b": _gb'
   bind -x '"\C-g\C-t": _gt'

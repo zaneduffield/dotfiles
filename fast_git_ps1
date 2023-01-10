@@ -130,8 +130,8 @@ function __fastgit_ps1 () {
       state="($(__format "$branch" "" "$state"))"
     fi
 
-    local dollar
-    dollar="\[\e[0;$((lastExitCode == 0 ? 0 : 91))m\]\$\e[0m"
+    local exitCode
+    exitCode="\[\e[0;$((lastExitCode == 0 ? 0 : 91))m\][$lastExitCode]\e[0m"
     # Edit to suit your needs
-    export PS1="\[\e]0;\W\a\]\n\[\e[32m\]\u@\H \[\e[33m\]\w\[\e[0m\] \[\033[36m\]$state\[\033[0m\]\n$dollar "
+    export PS1="\[\e]0;\W\a\]\n\[\e[32m\]\u@\H \[\e[33m\]\w\[\e[0m\] \[\033[36m\]$state\[\033[0m\] $exitCode\n\$ "
 }

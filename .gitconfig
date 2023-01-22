@@ -19,7 +19,8 @@
 	longpaths = true
 	editor = vim
   pager = delta
-	fsmonitor = true
+  # fsmonitor gives me grief on Linux
+	# fsmonitor = true
 
 [advice]
 	detachedHead = false

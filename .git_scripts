@@ -16,7 +16,7 @@ alias gitRoot='git rev-parse --show-toplevel'
 
 function gl {
   local s="▕"
-  git log --color=always --date=relative -n 100 \
+  git log --color=always --date=relative -n 300 \
     --pretty=format:"%D$s%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%Creset%s$s%C(cyan)%cN$s%(trailers:separator=; )" "$@" | \
     column --table --separator "$s" --output-separator "$s" | \
     awk -F $s '

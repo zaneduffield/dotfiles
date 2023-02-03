@@ -15,9 +15,9 @@ export FZF_CTRL_T_DEFAULT_COMMAND="\
 export FZF_CTRL_T_COMMAND="git ls-files 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND"
 
 # ripped straight from fzf/key-bindings.bash
-FZF_ALT_C_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
+FZF_ALT_C_DEFAULT_COMMAND="find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type d -print 2> /dev/null | cut -b3-"
-export FZF_ALT_C_COMMAND="\\(git ls-files -co --directory | sed -E \'s|[^/]*$||\' | grep . | uniq -u\\) || $FZF_ALT_C_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="(git ls-files -co --directory | sed -E 's|[^/]*$||' | grep . | uniq -u) || $FZF_ALT_C_DEFAULT_COMMAND"
 
 export GIT_FZF_DEFAULT_OPTS='--height 50% --min-height 20 --border --bind ctrl-/:toggle-preview'
 FZF_GL_PREVIEW_COMMAND="gl"
@@ -25,7 +25,7 @@ FZF_GL_PREVIEW_COMMAND="gl"
 git-fzf-widget() {
   local selected
   selected=$(
-    (FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $GIT_FZF_DEFAULT_OPTS" __fzf_select__)
+    FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $GIT_FZF_DEFAULT_OPTS" __fzf_select__
   )
   if [ $# -gt 0 ]; then selected=$(echo "$selected" | eval "$@"); fi
   READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
@@ -33,11 +33,11 @@ git-fzf-widget() {
 }
 
 _gtu() {
-  FZF_CTRL_T_COMMAND="git ls-files -o --exclude-standard 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND" __fzf_select__
+  FZF_CTRL_T_COMMAND="git ls-files -o --exclude-standard 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND" git-fzf-widget
 }
 
 _gta() {
-  FZF_CTRL_T_COMMAND="git ls-files -o 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND" __fzf_select__
+  FZF_CTRL_T_COMMAND="git ls-files -o 2> /dev/null || $FZF_CTRL_T_DEFAULT_COMMAND" git-fzf-widget
 }
 
 _gd() {
@@ -63,9 +63,15 @@ _gcb() {
   is_in_git_repo || return
 
   local cmd branch
-  FZF_CTRL_T_COMMAND=$GB_FZF_CTRL_T_COMMAND \
-  FZF_DEFAULT_OPTS=$GB_FZF_DEFAULT_OPTS \
-  branch=$(__fzf_select__) && [ "$branch" != "" ] && cmd="git checkout $branch" && echo "$cmd" && eval "$cmd"
+  branch=$(
+    FZF_CTRL_T_COMMAND=$GB_FZF_CTRL_T_COMMAND \
+    FZF_DEFAULT_OPTS=$GB_FZF_DEFAULT_OPTS \
+    __fzf_select__
+  )
+  [ "$branch" != "" ] && 
+    cmd="git checkout $branch" &&
+    history -s "$cmd" &&
+    echo "$cmd"
 }
 
 _gt() {
@@ -98,7 +104,20 @@ _gs() {
 }
 
 if [[ $- =~ i ]]; then
-  bind -x '"\eg": _gcb'
+  # this is basically (like much of this script) inspired (read: copied) from the provided fzf/key-bindings.sh script
+  bind -m emacs-standard '"\eg": " \C-b\C-k \C-u`_gcb`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d\er"'
+
+  # these aren't added in the fzf/key-bindings.sh script, but it looks like a refresh
+  # is required after returning to vi mode
+  bind -m vi-command '"\er": redraw-current-line'
+  bind -m vi-insert '"\er": redraw-current-line'
+
+  # patch the provided alt+c binding to do a refresh at the end in vi mode
+  bind -m vi-command '"\ec": "\C-z\ec\C-z\er"'
+  bind -m vi-insert '"\ec": "\C-z\ec\C-z\er"'
+
+  bind -m vi-command '"\eg": "\C-z\eg\C-z\er"'
+  bind -m vi-insert '"\eg": "\C-z\eg\C-z\er"'
 
   bind -x '"\C-g\C-u": _gtu'
   bind -x '"\C-g\C-a": _gta'

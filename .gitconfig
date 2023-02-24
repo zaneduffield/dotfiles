@@ -1,6 +1,9 @@
 [user]
 	name = Zane Duffield
 
+[init]
+	defaultBranch = main
+
 [alias]
   b = branch
   c = checkout

@@ -6,6 +6,8 @@ export SHELL=$SHELL
 
 export INPUTRC=~/dotfiles/.inputrc
 
+export EDITOR=vim
+
 . ~/dotfiles/.bash_completion.sh
 . ~/dotfiles/.complete_alias.sh
 

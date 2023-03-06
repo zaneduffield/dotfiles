@@ -11,7 +11,7 @@
   cp = cherry-pick
   s = status
   dirdiff = difftool --dir-diff
-	dirshow = "!f(){ git dirdiff \"$1~\" \"$1\"; }; f"
+	dirshow = "!f(){ git dirdiff \"${1-HEAD}~\" \"${1-HEAD}\"; }; f"
   basediff = "! git difftool \"$(git merge-base \"$(git rev-parse --abbrev-ref origin/HEAD)\" HEAD)\""
 	merge-ours = merge -s recursive -Xours
 	fpwl = push --force-with-lease

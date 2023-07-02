@@ -43,6 +43,7 @@
   # side-by-side = true
 [merge]
   conflictstyle = diff3
+  ff = only
 
 [diff]
   colorMoved = default

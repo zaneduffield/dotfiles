@@ -1,3 +1,5 @@
+syntax on
+
 let mapleader=" "
 nnoremap <Space> <NOP>
 

@@ -8,6 +8,8 @@ export INPUTRC=$DOTFILES/.inputrc
 
 export EDITOR=vim
 
+export PAGER='less -SFRX'
+
 . "$DOTFILES"/.bash_completion.sh
 . "$DOTFILES"/.complete_alias.sh
 

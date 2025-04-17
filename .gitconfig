@@ -40,7 +40,7 @@
   autosetuprebase = always
 
 [interactive]
-  diffFilter = delta --color-only
+  diffFilter = ~/dotfiles/delta.sh
 
 [delta]
   navigate = true  # use n and N to move between diff sections

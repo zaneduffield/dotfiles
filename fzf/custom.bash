@@ -1,8 +1,14 @@
 # GIT heart FZF
 # -------------
 
+# Roughly equivalent to `git rev-parse HEAD &> /dev/null`, but much, much faster on Windows(e.g. 1ms vs 100ms).
 is_in_git_repo() {
-  git rev-parse HEAD &> /dev/null
+  local dir=$PWD
+  while [ -n "$dir" ] && ! [ -e "$dir/.git" ]; do
+    dir=${dir%/*}
+  done
+
+  [ -n "$dir" ]
 }
 
 # ripped straight from fzf/key-bindings.bash

@@ -115,39 +115,39 @@ mergeToMaster() (
 )
 
 rebaseAll() (
-  local branch=$1
-  if [ -z "$branch" ]; then
-    1>&2 echo 'USAGE: rebaseAll <NEWBASE>'
-    return 1
+  export dryRun=0
+  if [ "${1-}" == "--dry-run" ]; then
+    dryRun=1 && shift;
   fi
 
-  let failCount=0
+  local branch=$1
+  if [ -z "$branch" ]; then
+    1>&2 echo 'USAGE: rebaseAll [--dry-run] <NEWBASE> [<regex>]'
+    return 1
+  fi
+  shift
 
-  #while read -r b; do 
-    #git tag -d "${b}_backup" 1>/dev/null || true
-    #git tag "${b}_backup" "$b" 1>&2
-    #
-    # I would batch these rebases, but git-replay currently bails when it finds a conflict
-    # and in this case it doesn't print the update-ref command for the rebases without
-    # conflicts.
-  #  if ! git replay --onto "$branch" "$branch..$b" | git update-ref --stdin; then
-  #    1>&2 echo "ERROR: branch $b has conflicts"
-  #    ((failCount++))
-  #  fi
-  #done 
+  local regex=${1:-.*}
 
+  ((failCount=0))
+
+  # shellcheck disable=SC2016
   # only rebase branches without an upstream
-  git -c column.branch=never branch --format "%(refname:short) %(upstream)" |
+  git branch --format '%(refname)' |
+      git for-each-ref --stdin --format "%(refname:short) %(upstream)" |
       awk '{if (!$2) print $1;}' |
-      grep -v "$branch" |
-      grep -v '^\+arch' |
+      grep -vE "$branch"'|^\+arch|^review/|^pr/' |
+      grep -E "$regex" |
       xargs -P16 -I {} bash -c '
         '"branch=$(printf %q "$branch")"'
         b={}
+        if [ "$dryRun" == "1" ]; then 1>&2 echo "$b"; exit 0; fi
+
         if ! git replay --onto "$branch" "$branch..$b"; then
           1>&2 echo "ERROR: branch $b has conflicts"
-          exit 1 
+          exit 1
         fi
+        1>&2 echo "successfully rebased $b onto $branch"
       ' |
       git update-ref --stdin
 )

@@ -33,7 +33,7 @@ git-fzf-widget() {
   selected=$(
     FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $GIT_FZF_DEFAULT_OPTS" __fzf_select__
   )
-  if [ $# -gt 0 ]; then selected=$(echo "$selected" | eval "$@"); fi
+  if [ $# -gt 0 ]; then selected=$(echo "$selected" | "$@"); fi
   READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
   READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
 }
@@ -91,7 +91,7 @@ _gt() {
 _gl() {
   is_in_git_repo || return
 
-  s='##' \
+  local s='##'
   FZF_CTRL_T_COMMAND="git log --color=always --date=relative -n 300 \
     --pretty=format:\"%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%Creset%s\" | \
     column --table --separator \"$s\" --output-separator \" \"" \

@@ -95,7 +95,7 @@ _gl() {
   FZF_CTRL_T_COMMAND="git log --color=always --date=relative -n 300 \
     --pretty=format:\"%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%Creset%s\" | \
     column --table --separator \"$s\" --output-separator \" \"" \
-  FZF_DEFAULT_OPTS="--ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
+  FZF_DEFAULT_OPTS="--tiebreak=chunk,end --ansi --reverse --multi --bind 'ctrl-s:toggle-sort' \
     --header 'Press CTRL-S to toggle sort' \
     --preview 'echo {} | grep -o "'"[a-f0-9]\{7,\}" | xargs git show --stat --color=always'"'" \
   git-fzf-widget "grep -oE '[a-f0-9]{7,}'"

@@ -68,25 +68,44 @@ function trim() {
 }
 
 if is_windows; then
-  function run-in-new-split-tab {
-    local idx=$1 title=$2 cmd=$3
-    shift 3
+  tmux-cmds() (
+    dir=$(cygpath -m "$PWD")
+    args=()
 
-    local splitDir=(H V H H V V V V H H H H H H H H)
-    local focusCommands=('' 'wt move-focus left' 'wt move-focus right' 'wt move-focus left && wt move-focus up' 'wt move-focus right' 'wt move-focus down && wt move-focus left' 'wt move-focus right && wt move-focus right' '')
+    splitDir=(H V H H V V V V H H H H H H H H)
+    focusCommands=('' 'mf left' 'mf right' 'mf left ; mf up' 'mf right' 'mf down ; mf left' 'mf right ; mf right' '')
 
-    local subcommand
-    if [ "$idx" -eq 0 ]; then
-      subcommand='new-tab'
-    else
-      subcommand='split-pane'
-    fi
+    idx=0
+    nextArgs=()
+    while [ $# -gt 0 ] || [ ${#nextArgs} -gt 0 ]; do
+      if [ "${1:-;}" == ';' ]; then
+        splitIdx=$(( idx % ${#focusCommands[@]} ))
 
+        if [ ${#args} -gt 0 ]; then
+          args+=(';')
+        fi
 
-    wt "$subcommand" --title "$title" "-${splitDir[idx]}" --suppressApplicationTitle "$cmd" "$@"
-    # sometimes the new tab takes a little time to open; the move-focus won't work as expected if it isn't open
-    sleep 0.1s
-    eval "${focusCommands[idx]}"
-    echo "$(( (idx+1) % ${#focusCommands[@]}))"
-  }
+        if (( splitIdx == 0 )); then
+          args+=(nt)
+        else
+          args+=(sp "-${splitDir[$splitIdx]}")
+        fi
+        args+=(-d "$dir" -- "${nextArgs[@]}")
+        nextArgs=()
+
+        # shellcheck disable=SC2206
+        if [ "${focusCommands[$splitIdx]}" != '' ]; then
+          args+=(';' ${focusCommands[$splitIdx]})
+        fi
+
+        ((idx+=1))
+      else
+        nextArgs+=("$1")
+      fi
+
+      shift
+    done
+
+    wt "${args[@]}"
+  )
 fi

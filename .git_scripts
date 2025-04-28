@@ -242,3 +242,28 @@ deleteMergedBranches() {
   git branch --merged "$@" | grep -Ev "(^\*|master|main|dev)" | xargs -r git branch -d
 }
 
+deleteBranchesWithoutMe() {
+  local name
+  name=$(git config user.name)
+
+  while read -r b; do
+    if [ -z "$(git log --author "$name" master.."$b")" ]; then
+      while true; do
+        read -p "Branch $b contains no commits from author $name, delete? y/N/log: " resp < /dev/tty
+        if [[ "$resp" == [lL]* ]]; then
+          gl master.."$b" | cat
+          continue
+        elif [[ "$resp" == [yY]* ]]; then
+          git branch -D "$b"
+          break
+        elif [[ "$resp" == [nN]* ]]; then
+          break
+        fi
+      done
+    fi
+  done < <(
+    git branch --list --format="%(refname:short) %(upstream:track)" |
+    awk '$2=="" { print $1 }'
+  )
+}
+

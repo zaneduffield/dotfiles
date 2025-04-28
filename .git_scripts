@@ -32,6 +32,8 @@ fi
 
 alias root='cd "$(gitRoot)"'
 
+alias gh-pr-involves-me='gh pr list --search "involves:@me state:open"'
+
 function gl {
   local s="▕"
   git log --color=always --date=relative -n 300 \

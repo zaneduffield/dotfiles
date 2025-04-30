@@ -98,7 +98,7 @@ _gl() {
   FZF_DEFAULT_OPTS="--tiebreak=chunk,end --ansi --reverse --multi --bind 'ctrl-s:toggle-sort' \
     --header 'Press CTRL-S to toggle sort' \
     --preview 'echo {} | grep -o "'"[a-f0-9]\{7,\}" | xargs git show --stat --color=always'"'" \
-  git-fzf-widget "grep -oE '[a-f0-9]{7,}'"
+  git-fzf-widget grep -oE '[a-f0-9]{7,}'
 }
 
 _gs() {

@@ -30,6 +30,16 @@ if [[ $(type -t gitRoot) != function ]]; then
   }
 fi
 
+gitRootWin() {
+  local root
+  root=$(gitRoot)
+  if [[ "$root" =~ ^/([a-zA-Z])/(.*)$ ]]; then
+    root=${BASH_REMATCH[1]^}:/${BASH_REMATCH[2]}
+  fi
+
+  printf %s "$root"
+}
+
 alias root='cd "$(gitRoot)"'
 
 alias gh-pr-involves-me='gh pr list --search "involves:@me state:open"'

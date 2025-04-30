@@ -90,7 +90,7 @@ if is_windows; then
         else
           args+=(sp "-${splitDir[$splitIdx]}")
         fi
-        args+=(-d "$dir" -- "${nextArgs[@]}")
+        args+=(-d "$dir" "${nextArgs[@]}")
         nextArgs=()
 
         # shellcheck disable=SC2206

@@ -71,6 +71,7 @@
 
 [absorb]
   maxStack=50
+  oneFixupPerCommit = true
 
 [column]
   ui = auto

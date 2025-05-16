@@ -118,10 +118,6 @@ if [[ $- =~ i ]]; then
   bind -m vi-command '"\er": redraw-current-line'
   bind -m vi-insert '"\er": redraw-current-line'
 
-  # patch the provided alt+c binding to do a refresh at the end in vi mode
-  bind -m vi-command '"\ec": "\C-z\ec\C-z\er"'
-  bind -m vi-insert '"\ec": "\C-z\ec\C-z\er"'
-
   bind -m vi-command '"\eg": "\C-z\eg\C-z\er"'
   bind -m vi-insert '"\eg": "\C-z\eg\C-z\er"'
 

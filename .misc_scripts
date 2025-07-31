@@ -58,8 +58,6 @@ function cleanDir() {
 
 alias cleantmp='cleanDir "$TMP"'
 
-export PATH="$PATH:/c/Users/zad/.vscode/extensions/timonwong.shellcheck-0.19.5/binaries/win32/x32"
-
 function trim() {
     local var="$*"
     # remove leading whitespace characters

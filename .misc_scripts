@@ -8,7 +8,7 @@ set -o pipefail
 shopt -s globstar
 shopt -u nullglob
 
-export LESS="-IRS"
+export LESS="-IRS -#5"
 
 function min {
   echo "$(($1<$2 ? $1 : $2))"

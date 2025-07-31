@@ -30,7 +30,10 @@ if which gh &> /dev/null; then
 fi
 
 complete_aliases() {
+  local prevCompletions
+  prevCompletions=$(complete -p)
   complete -F _complete_alias "${!BASH_ALIASES[@]}"
+  eval "$prevCompletions"
 }
 
 complete_aliases

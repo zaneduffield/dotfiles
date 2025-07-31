@@ -48,7 +48,6 @@ function __format() {
   local f=$2
   local r=$3
 
-	b=${b##refs/heads/}
 	local z=" "
   echo "$b${f:+$z$f}$r"
 }
@@ -120,11 +119,14 @@ function __fast_git_dir () {
 function __fast_git_branch () {
     local gitdir=$1
     local headfile="$gitdir/HEAD"
-    local branch
+    local branch=''
     if [ -e "$headfile" ]; then
       read -r head < "$headfile" || return
       case "$head" in
-          ref:*) branch="${head##*/}" ;;
+          ref:*)
+            branch="${head#ref: }" 
+            branch="${branch#refs/heads/}" 
+            ;;
           "") branch="" ;;
           *) branch="${head:0:7}" ;;  #Detached head. You can change the format for this too.
       esac

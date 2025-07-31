@@ -48,7 +48,7 @@ _gd() {
   git-fzf-widget
 }
 
-GB_FZF_CTRL_T_COMMAND="git branch -a --color=always | grep -v '/HEAD\s' | sort | sed 's/^..//'" \
+GB_FZF_CTRL_T_COMMAND="git branch -a --color=always | grep -v '/HEAD\\b' | sort | sed 's/^..//'" \
 GB_FZF_DEFAULT_OPTS="--ansi --multi --tac --preview-window right:70% --preview '$FZF_GL_PREVIEW_COMMAND {}'" \
 
 _gb() {

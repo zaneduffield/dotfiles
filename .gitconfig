@@ -72,5 +72,8 @@
 [absorb]
   maxStack=50
 
+[column]
+  ui = auto
+
 [include]
   path = ~/.gitconfig.local

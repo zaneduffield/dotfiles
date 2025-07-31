@@ -21,6 +21,10 @@ export PAGER='less -SFRX'
 
 alias refreshenv='. ~/dotfiles/refreshenv/refrenv.sh'
 
+if which zoxide &> /dev/null; then
+  eval "$(zoxide init bash)"
+fi
+
 complete_aliases() {
   complete -F _complete_alias "${!BASH_ALIASES[@]}"
 }

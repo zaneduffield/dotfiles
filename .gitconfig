@@ -75,5 +75,8 @@
 [column]
   ui = auto
 
+[branch]
+  sort = -committerdate
+
 [include]
   path = ~/.gitconfig.local

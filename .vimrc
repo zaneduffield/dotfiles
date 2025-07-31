@@ -32,6 +32,9 @@ set fo-=t fo-=c
 " wrap lines at desired column (when using gq)
 set textwidth=100
 
+" Prevent the addition of a second space after punctuation when joining lines
+set nojoinspaces
+
 " A workaround for using Alt in terminals
 " see https://stackoverflow.com/questions/6778961/alt-key-shortcuts-not-working-on-gnome-terminal-with-vim/10216459#10216459
 let c='a'

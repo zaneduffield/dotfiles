@@ -66,5 +66,8 @@
 [diff]
   colorMoved = default
 
+[difftool]
+  prompt = false
+
 [include]
   path = ~/.gitconfig.local

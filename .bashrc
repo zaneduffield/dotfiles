@@ -25,6 +25,10 @@ if which zoxide &> /dev/null; then
   eval "$(zoxide init bash)"
 fi
 
+if which gh &> /dev/null; then
+  eval "$(gh completion -s bash)"
+fi
+
 complete_aliases() {
   complete -F _complete_alias "${!BASH_ALIASES[@]}"
 }

@@ -72,24 +72,13 @@ function __git_wrap__git_diff() {
 }
 complete -F __git_wrap__git_diff diffall
 
-function tempDisableHooks() (
-  local hookDir
-  hookDir="$(git rev-parse --git-path hooks)"
-  local tempName="${hookDir}_"
-  mv "$hookDir" "$tempName"
-  trap "mv '$tempName' '$hookDir'" RETURN EXIT
-  "$@"
-)
-complete -F _command tempDisableHooks
-
-alias commit='tempDisableHooks git commit -v'
-alias fixup='tempDisableHooks git commit -v --fixup'
-alias amend='tempDisableHooks git commit --amend -v'
-alias noedit='tempDisableHooks git commit --amend --no-edit'
-alias rebase='tempDisableHooks git rebase'
-alias revert='tempDisableHooks git revert'
-alias gcp='tempDisableHooks git cherry-pick'
-alias cont='tempDisableHooks git rebase --continue'
+alias commit='git commit -v'
+alias fixup='git commit -v --fixup'
+alias amend='git commit --amend -v'
+alias noedit='git commit --amend --no-edit'
+alias rebase='git rebase'
+alias revert='git revert'
+alias gcp='git cherry-pick'
 
 mergeToMaster() (
   set -x

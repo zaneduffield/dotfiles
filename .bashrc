@@ -19,6 +19,8 @@ export PAGER='less -SFRX'
 . "$DOTFILES"/fzf/fzf.bash
 . "$DOTFILES"/bat.bash
 
+alias refreshenv='. ~/dotfiles/refreshenv/refrenv.sh'
+
 complete_aliases() {
   complete -F _complete_alias "${!BASH_ALIASES[@]}"
 }

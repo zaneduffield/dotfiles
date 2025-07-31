@@ -81,15 +81,13 @@ alias revert='git revert'
 alias gcp='git cherry-pick'
 
 cont() {
-  local gitState gitDir gitBranch
-  # provided by my fast_git_ps1 script
-  gitDir=$(__fast_git_dir)
-  gitBranch=$(__fast_git_branch "$gitDir")
-  gitState=$(__git_state "$gitDir" "$gitBranch")
-  # remove everything after a space
-  gitState=${gitState%% *}
-  # remove leading |
-  gitState=${gitState#|}
+  local gitState
+  if [[ "${PS1@P}" =~ .*\([^\)]*\|([[:alpha:]-]+)[^\)]*\) ]]; then
+    gitState=${BASH_REMATCH[1]}
+  else
+    1>&2 echo 'Failed to parse git state from PS1'
+    return 1
+  fi
 
   if [ "$gitState" == "REBASE" ]; then
     git rebase --continue
@@ -100,7 +98,7 @@ cont() {
   elif [ "$gitState" == "REVERTING" ]; then
     git revert --continue
   else
-    2>&1 echo 'Cannot continue in this git state'
+    1>&2 echo "Cannot continue in this git state: $gitState"
     return 1
   fi
 }

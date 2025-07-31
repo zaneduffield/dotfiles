@@ -69,5 +69,8 @@
 [difftool]
   prompt = false
 
+[absorb]
+  maxStack=50
+
 [include]
   path = ~/.gitconfig.local

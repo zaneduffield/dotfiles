@@ -80,6 +80,31 @@ alias rebase='git rebase'
 alias revert='git revert'
 alias gcp='git cherry-pick'
 
+cont() {
+  local gitState gitDir gitBranch
+  # provided by my fast_git_ps1 script
+  gitDir=$(__fast_git_dir)
+  gitBranch=$(__fast_git_branch "$gitDir")
+  gitState=$(__git_state "$gitDir" "$gitBranch")
+  # remove everything after a space
+  gitState=${gitState%% *}
+  # remove leading |
+  gitState=${gitState#|}
+
+  if [ "$gitState" == "REBASE" ]; then
+    git rebase --continue
+  elif [ "$gitState" == "MERGING" ]; then
+    git merge --continue
+  elif [ "$gitState" == "CHERRY-PICKING" ]; then
+    git cherry-pick --continue
+  elif [ "$gitState" == "REVERTING" ]; then
+    git revert --continue
+  else
+    2>&1 echo 'Cannot continue in this git state'
+    return 1
+  fi
+}
+
 mergeToMaster() (
   set -x
   git checkout master && \

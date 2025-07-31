@@ -78,6 +78,7 @@ function __git_state() {
 			fi
 		elif [ -f "$g/MERGE_HEAD" ]; then
 			r="|MERGING"
+    # internally modifies the `r` variable
 		elif __git_sequencer_status; then
 			:
 		elif [ -f "$g/BISECT_LOG" ]; then
@@ -92,9 +93,7 @@ function __git_state() {
   echo "$r"
 }
 
-function __fastgit_ps1 () {
-    local lastExitCode=$?
-    local headfile="" head="" branch="" state=""
+function __fast_git_dir () {
     local dir="$PWD"
     local gitdir=""
 
@@ -110,12 +109,18 @@ function __fastgit_ps1 () {
       fi
 
       if [ -e "$gitdir/HEAD" ]; then
-          headfile="$gitdir/HEAD"
           break
       fi
       dir="${dir%/*}"
     done
 
+    printf %s "$gitdir"
+}
+
+function __fast_git_branch () {
+    local gitdir=$1
+    local headfile="$gitdir/HEAD"
+    local branch
     if [ -e "$headfile" ]; then
       read -r head < "$headfile" || return
       case "$head" in
@@ -124,6 +129,16 @@ function __fastgit_ps1 () {
           *) branch="${head:0:7}" ;;  #Detached head. You can change the format for this too.
       esac
     fi
+
+    printf %s "$branch"
+}
+
+function __fastgit_ps1 () {
+    local lastExitCode=$?
+    local head="" branch="" state=""
+    local gitdir
+    gitdir=$(__fast_git_dir)
+    branch=$(__fast_git_branch "$gitdir")
 
     if [ -n "$branch" ]; then
       state="$(__git_state "$gitdir" "$branch")"

@@ -46,7 +46,7 @@ alias gh-pr-involves-me='gh pr list --search "involves:@me state:open"'
 
 function gl {
   local s="▕"
-  git log --color=always --date=relative -n 300 \
+  git -c core.abbrev=7 log --color=always --date=relative -n 300 \
     --pretty=format:"%D$s%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%C(cyan)%cN$s%Creset%s$s%(trailers:separator=; )" "$@" | \
     column --table --separator "$s" --output-separator "$s" | \
     awk -F "$s" '

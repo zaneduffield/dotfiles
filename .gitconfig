@@ -10,13 +10,16 @@
   c = checkout
   cp = cherry-pick
   s = status
+  reword = commit --amend --only
   dirdiff = difftool --dir-diff
+  dirdiffs = dirdiff --staged
+  diffs = diff --staged
+  difftools = difftool --staged
 	dirshow = "!f(){ git dirdiff \"${1-HEAD}~\" \"${1-HEAD}\"; }; f"
   basediff = "! git difftool \"$(git merge-base \"$(git rev-parse --abbrev-ref origin/HEAD)\" HEAD)\""
+  rebasebase = "! git rebase --keep-base \"$@\""
 	merge-ours = merge -s recursive -Xours
-	fpwl = push --force-with-lease
-  yolo = "!f(){ git commit -a -m \"$(curl http://whatthecommit.com/index.txt 2>/dev/null)\" }; f"
-
+  fpwl = push --force-with-lease
 
 [core]
   autocrlf = false

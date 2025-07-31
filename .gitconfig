@@ -44,7 +44,21 @@
 
 [delta]
   navigate = true  # use n and N to move between diff sections
-  # side-by-side = true
+  side-by-side = true
+  # mangles the output in vscode :(
+  #hyperlinks = true
+  hyperlinks-file-link-format = "vscode://file/{path}:{line}"
+
+  # copied from the "zebra-dark" theme
+  map-styles = \
+     bold purple => syntax "#330f29", \
+     bold blue => syntax "#271344", \
+     bold cyan => syntax "#0d3531", \
+     bold yellow => syntax "#222f14"
+
+[blame]
+  pager = delta
+
 [merge]
   conflictstyle = diff3
   ff = only

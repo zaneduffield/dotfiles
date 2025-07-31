@@ -20,6 +20,7 @@
   rebasebase = "! git rebase --keep-base \"$@\""
 	merge-ours = merge -s recursive -Xours
   fpwl = push --force-with-lease
+  si-range-diff = -c pager.range-diff='~/dotfiles/git-range-diff-delta-preproc | delta --features=side-range-diff' range-diff
 
 [core]
   autocrlf = false

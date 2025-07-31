@@ -62,7 +62,7 @@ function gl {
         print ""
       }
       ' | \
-    less -R -S -# 5
+    less
 }
 export -f gl
 

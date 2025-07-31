@@ -49,18 +49,18 @@ function gl {
   git log --color=always --date=relative -n 300 \
     --pretty=format:"%D$s%C(yellow)%h$s%Cred%cd$s%C(cyan)%aN$s%C(cyan)%cN$s%Creset%s$s%(trailers:separator=; )" "$@" | \
     column --table --separator "$s" --output-separator "$s" | \
-    awk -F $s '
+    awk -F "$s" '
       { aN = 4; last = 6; cN = 5; trailers = 7 }
       { endTrailerPrefix = "└─ "; trailerPrefix = endTrailerPrefix }
       { if ($1 ~ /[^ ]/) printf "  \033[1;32m┌─ %s\n", $1 }
-      {
-        if (gensub(/^ *| *$/, "", "g", $aN) == gensub(/^ *| *$/, "", "g", $cN)) { $cN = "\033[0;35m" $cN }
-      }
-      { for (i=2; i<=last; i++) printf "%s ", $i }
+      { sub(/ +$/, "", $last) }
+      { for (i=2; i<=last; i++) if (i != cN) printf "%s ", $i }
       { if ($trailers ~ /[^ ]/) printf "\n  \033[0;35m%s%s", trailerPrefix, $trailers }
-      {
-        print ""
+      { 
+        if (gensub(/^ *| *$/, "", "g", $aN) != gensub(/^ *| *$/, "", "g", $cN))
+          printf "\n  \033[0;36m%scommitter: %s", trailerPrefix, $cN
       }
+      { print "" }
       ' | \
     less
 }
